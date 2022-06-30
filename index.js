@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -20,6 +20,7 @@ async function run() {
         await client.connect();
         console.log("DB Connected");
         const workCollection = client.db('toDoWorkList').collection('work');
+        const deleteCollection = client.db('toDoWorkList').collection('completed');
 
         // get All Tasks
         app.get('/work', async (req, res) => {
@@ -30,6 +31,7 @@ async function run() {
         })
 
 
+
         // POST Task: add a new Task
         app.post('/work', async (req, res) => {
             const newWork = req.body;
@@ -37,8 +39,21 @@ async function run() {
             res.send(result)
         });
 
+        // POST : Deleted/completed Task
+        app.post('/completed', async (req, res) => {
+            const newWork = req.body;
+            const result = await deleteCollection.insertOne(newWork);
+            res.send(result)
+        });
 
-    
+        // DELETE from manage car service
+        app.delete('/work/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await workCollection.deleteOne(query);
+            res.send(result);
+        })
+
     }
     finally {
         // await client.close();
