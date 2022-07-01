@@ -29,7 +29,21 @@ async function run() {
             const works = await cursor.toArray();
             res.send(works)
         })
+        // get All Tasks
+        app.get('/work/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await workCollection.findOne(query);
+            res.send(result);
+        });
 
+        // get deleted Tasks
+        app.get('/completed', async (req, res) => {
+            const query = {};
+            const cursor = deleteCollection.find(query);
+            const deletedTask = await cursor.toArray();
+            res.send(deletedTask)
+        })
 
 
         // POST Task: add a new Task
@@ -51,6 +65,21 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await workCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // Update Tasks
+        app.put('/work/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedWork = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    name: updatedWork.name
+                }
+            };
+            const result = await workCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         })
 
